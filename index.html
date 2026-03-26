@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -679,15 +678,17 @@ const K401_LIMIT = 23500; // employee contribution limit 2025
 const STANDARD_DED = { single: 15000, mfj: 30000 }; // 2025
 
 function getStandardDed() {
-  const filing = document.getElementById('filingStatus').value;
+  const el = document.getElementById('filingStatus');
+  const filing = el ? el.value : 'single';
   return STANDARD_DED[filing] || 15000;
 }
 
 function getItemizedTotal() {
-  const mortgage = parseFloat(document.getElementById('ded-mortgage').value) || 0;
-  const salt = Math.min(parseFloat(document.getElementById('ded-salt').value) || 0, 10000); // SALT cap
-  const charity = parseFloat(document.getElementById('ded-charity').value) || 0;
-  const other = parseFloat(document.getElementById('ded-other').value) || 0;
+  const mortgage = parseFloat((document.getElementById('ded-mortgage') || {value:'0'}).value) || 0;
+  const saltRaw = parseFloat((document.getElementById('ded-salt') || {value:'0'}).value) || 0;
+  const salt = Math.min(saltRaw, 10000);
+  const charity = parseFloat((document.getElementById('ded-charity') || {value:'0'}).value) || 0;
+  const other = parseFloat((document.getElementById('ded-other') || {value:'0'}).value) || 0;
   return mortgage + salt + charity + other;
 }
 
@@ -699,7 +700,9 @@ function getEffectiveDeduction() {
 }
 
 function updateK401Display() {
-  const pct = parseFloat(document.getElementById('k401').value) || 0;
+  const k401El = document.getElementById('k401');
+  if (!k401El) return;
+  const pct = parseFloat(k401El.value) || 0;
   const dollars = Math.round(K401_LIMIT * pct / 100);
   const el = document.getElementById('k401-dollar-display');
   const noteEl = document.getElementById('k401-limit-note');
@@ -708,6 +711,8 @@ function updateK401Display() {
 }
 
 function updateDeductionDisplay() {
+  const filingEl = document.getElementById('filingStatus');
+  if (!filingEl) return;
   const std = getStandardDed();
   const el = document.getElementById('std-ded-amount');
   if (el) el.textContent = `$${std.toLocaleString()} (2025)`;
@@ -720,7 +725,8 @@ function updateItemizedTotal() {
   const std = getStandardDed();
   const el = document.getElementById('itemized-total-display');
   if (!el) return;
-  const saltNote = (parseFloat(document.getElementById('ded-salt').value)||0) > 10000 ? ' ⚠️ SALT capped at $10,000' : '';
+  const saltEl = document.getElementById('ded-salt');
+  const saltNote = saltEl && parseFloat(saltEl.value) > 10000 ? ' ⚠️ SALT capped at $10,000' : '';
   if (itemized > std) {
     el.innerHTML = `✅ Itemized total: $${itemized.toLocaleString()} — saves $${(itemized - std).toLocaleString()} vs standard${saltNote}`;
     el.style.color = 'var(--success)';
@@ -762,6 +768,7 @@ function setDeductionType(type) {
 window.addEventListener('DOMContentLoaded', () => {
   updateK401Display();
   updateDeductionDisplay();
+  setDeductionType('standard');
 });
 
 function switchTab(tab) {
