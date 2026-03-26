@@ -1,1 +1,1035 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Grad Loan Calculator</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0d2137;
+    --navy-mid: #163352;
+    --blue: #1e4d7b;
+    --accent: #3b82f6;
+    --accent-light: #93c5fd;
+    --gold: #f59e0b;
+    --gold-light: #fde68a;
+    --bg: #f0f4f9;
+    --card: #ffffff;
+    --text: #1e293b;
+    --muted: #64748b;
+    --border: #cbd5e1;
+    --success: #10b981;
+    --warn: #f59e0b;
+    --danger: #ef4444;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  header {
+    background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+    color: white;
+    padding: 2.5rem 2rem 2rem;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 300px; height: 300px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  header::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: 10%;
+    width: 200px; height: 200px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.03);
+  }
+  header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.8rem);
+    letter-spacing: -0.5px;
+    margin-bottom: 0.4rem;
+  }
+  header p {
+    opacity: 0.75;
+    font-size: 0.95rem;
+    font-weight: 300;
+  }
+
+  /* TABS */
+  .tabs {
+    display: flex;
+    background: var(--navy);
+    border-top: 1px solid rgba(255,255,255,0.1);
+  }
+  .tab-btn {
+    flex: 1;
+    padding: 0.85rem 1rem;
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.55);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.3px;
+    border-bottom: 3px solid transparent;
+  }
+  .tab-btn.active {
+    color: var(--gold-light);
+    border-bottom-color: var(--gold);
+  }
+  .tab-btn:hover:not(.active) { color: rgba(255,255,255,0.8); }
+
+  /* LAYOUT */
+  .main {
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+    display: grid;
+    grid-template-columns: 380px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  /* PANELS */
+  .panel {
+    background: var(--card);
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+    overflow: hidden;
+  }
+  .panel-header {
+    background: var(--navy-mid);
+    color: white;
+    padding: 1rem 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .panel-body { padding: 1.4rem; }
+
+  /* FORM ELEMENTS */
+  .section-title {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    color: var(--muted);
+    margin: 1.2rem 0 0.7rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .section-title:first-child { margin-top: 0; }
+
+  .field { margin-bottom: 0.9rem; }
+  .field label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    margin-bottom: 0.3rem;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 0.55rem 0.8rem;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    color: var(--text);
+    background: white;
+    transition: border-color 0.2s;
+    outline: none;
+  }
+  .field input:focus, .field select:focus { border-color: var(--accent); }
+  .input-prefix {
+    position: relative;
+  }
+  .input-prefix span {
+    position: absolute;
+    left: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .input-prefix input { padding-left: 1.6rem; }
+  .input-suffix {
+    position: relative;
+  }
+  .input-suffix span {
+    position: absolute;
+    right: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+  .input-suffix input { padding-right: 1.8rem; }
+
+  /* PLAN SELECTOR */
+  .plan-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+  }
+  .plan-card {
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+  }
+  .plan-card.selected {
+    border-color: var(--accent);
+    background: #eff6ff;
+  }
+  .plan-card .plan-name {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--navy);
+  }
+  .plan-card .plan-sub {
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-top: 0.15rem;
+  }
+
+  /* CALCULATE BTN */
+  .calc-btn {
+    width: 100%;
+    margin-top: 1.2rem;
+    padding: 0.85rem;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--blue) 100%);
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    letter-spacing: 0.3px;
+  }
+  .calc-btn:hover { opacity: 0.9; }
+  .calc-btn:active { transform: scale(0.99); }
+
+  /* RIGHT PANEL */
+  .right-col { display: flex; flex-direction: column; gap: 1.2rem; }
+
+  /* SUMMARY CARDS */
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.9rem;
+  }
+  .summary-card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 1.2rem 1rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+    border-top: 3px solid var(--accent);
+    text-align: center;
+  }
+  .summary-card.gold { border-top-color: var(--gold); }
+  .summary-card.green { border-top-color: var(--success); }
+  .summary-card .s-label {
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--muted);
+    margin-bottom: 0.4rem;
+  }
+  .summary-card .s-value {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.6rem;
+    color: var(--navy);
+  }
+  .summary-card .s-sub {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+
+  /* YEAR TABLE */
+  .table-wrap { overflow-x: auto; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  thead th {
+    background: var(--navy);
+    color: white;
+    padding: 0.65rem 0.8rem;
+    text-align: left;
+    font-weight: 500;
+    font-size: 0.75rem;
+    letter-spacing: 0.3px;
+    white-space: nowrap;
+  }
+  thead th:first-child { border-radius: 0; }
+  tbody tr { border-bottom: 1px solid #f1f5f9; transition: background 0.1s; }
+  tbody tr:hover { background: #f8fafc; }
+  tbody td { padding: 0.6rem 0.8rem; color: var(--text); white-space: nowrap; }
+  tbody td.highlight { font-weight: 600; color: var(--navy); }
+  tbody td.editable-cell { padding: 0.3rem 0.5rem; }
+  tbody td.editable-cell input {
+    width: 90px;
+    padding: 0.3rem 0.5rem;
+    border: 1.5px solid var(--border);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+  }
+  tbody td.editable-cell input:focus { border-color: var(--accent); }
+  .badge {
+    display: inline-block;
+    padding: 0.15rem 0.5rem;
+    border-radius: 99px;
+    font-size: 0.68rem;
+    font-weight: 600;
+  }
+  .badge-blue { background: #dbeafe; color: var(--blue); }
+  .badge-gold { background: #fef3c7; color: #92400e; }
+  .badge-green { background: #d1fae5; color: #065f46; }
+
+  /* CHART */
+  .chart-container { position: relative; height: 220px; }
+
+  /* NOTICE */
+  .notice {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    font-size: 0.78rem;
+    color: #78350f;
+    line-height: 1.5;
+  }
+  .notice strong { color: #92400e; }
+
+  /* PLAN INFO BOX */
+  .plan-info {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 10px;
+    padding: 0.8rem 1rem;
+    font-size: 0.78rem;
+    color: var(--blue);
+    line-height: 1.6;
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 2rem;
+    color: var(--muted);
+  }
+  .empty-state .big-icon { font-size: 3rem; margin-bottom: 1rem; }
+  .empty-state h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    color: var(--navy);
+    margin-bottom: 0.5rem;
+  }
+  .empty-state p { font-size: 0.85rem; }
+
+  /* CONTENT TABS */
+  .content-section { display: none; }
+  .content-section.active { display: block; }
+
+  /* TOGGLE */
+  .toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.9rem;
+  }
+  .toggle-label { font-size: 0.8rem; font-weight: 500; color: var(--muted); }
+  .toggle {
+    position: relative;
+    width: 38px;
+    height: 20px;
+    cursor: pointer;
+  }
+  .toggle input { opacity: 0; width: 0; height: 0; }
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--border);
+    border-radius: 999px;
+    transition: background 0.2s;
+  }
+  .toggle-slider::after {
+    content: '';
+    position: absolute;
+    width: 14px; height: 14px;
+    background: white;
+    border-radius: 50%;
+    top: 3px; left: 3px;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  }
+  .toggle input:checked + .toggle-slider { background: var(--accent); }
+  .toggle input:checked + .toggle-slider::after { transform: translateX(18px); }
+
+  /* PROMOTION PILL */
+  .promo-indicator {
+    display: inline-block;
+    background: var(--gold);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.1rem 0.45rem;
+    border-radius: 4px;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+    .summary-grid { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 600px) {
+    .summary-grid { grid-template-columns: 1fr; }
+    .plan-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Graduate Loan Repayment Calculator</h1>
+  <p>Model your total repayment across income-driven &amp; standard plans</p>
+</header>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('calculator')">⚙️ Calculator</button>
+  <button class="tab-btn" onclick="switchTab('plan-info')">📋 Plan Details</button>
+  <button class="tab-btn" onclick="switchTab('rap-table')">📊 RAP Rate Table</button>
+</div>
+
+<!-- ===================== TAB: CALCULATOR ===================== -->
+<div class="content-section active" id="tab-calculator">
+<div class="main">
+
+  <!-- LEFT: INPUTS -->
+  <div>
+    <div class="panel">
+      <div class="panel-header">🎓 Loan & Income Setup</div>
+      <div class="panel-body">
+
+        <div class="section-title">Loan Details</div>
+        <div class="field">
+          <label>Total Loan Balance ($)</label>
+          <div class="input-prefix"><span>$</span><input type="number" id="loanBalance" value="150000" step="1000"></div>
+        </div>
+        <div class="field">
+          <label>Annual Interest Rate (%)</label>
+          <div class="input-suffix"><span>%</span><input type="number" id="interestRate" value="7.05" step="0.05"></div>
+        </div>
+
+        <div class="section-title">Repayment Plan</div>
+        <div class="plan-grid">
+          <div class="plan-card selected" data-plan="RAP" onclick="selectPlan(this)">
+            <div class="plan-name">RAP</div>
+            <div class="plan-sub">Income-driven, up to 30 yrs</div>
+          </div>
+          <div class="plan-card" data-plan="IBR_POST" onclick="selectPlan(this)">
+            <div class="plan-name">IBR (post-2014)</div>
+            <div class="plan-sub">10% income, 20 yrs</div>
+          </div>
+          <div class="plan-card" data-plan="IBR_PRE" onclick="selectPlan(this)">
+            <div class="plan-name">IBR (pre-2014)</div>
+            <div class="plan-sub">15% income, 25 yrs</div>
+          </div>
+          <div class="plan-card" data-plan="STANDARD" onclick="selectPlan(this)">
+            <div class="plan-name">Standard</div>
+            <div class="plan-sub">Fixed, 10–25 yrs</div>
+          </div>
+        </div>
+
+        <div id="standard-term-field" class="field" style="display:none; margin-top:0.8rem;">
+          <label>Standard Plan Term (years)</label>
+          <select id="standardTerm">
+            <option value="10">10 years</option>
+            <option value="15">15 years</option>
+            <option value="20">20 years</option>
+            <option value="25">25 years</option>
+          </select>
+        </div>
+
+        <div class="section-title">Income & Adjustments</div>
+        <div class="field">
+          <label>Starting Gross Income ($)</label>
+          <div class="input-prefix"><span>$</span><input type="number" id="grossIncome" value="75000" step="1000"></div>
+        </div>
+        <div class="field">
+          <label>Annual Raise (%)</label>
+          <div class="input-suffix"><span>%</span><input type="number" id="annualRaise" value="3" step="0.5"></div>
+        </div>
+        <div class="field">
+          <label>Filing Status</label>
+          <select id="filingStatus" onchange="updateDeductionDisplay()">
+            <option value="single">Single</option>
+            <option value="mfj">Married Filing Jointly</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>401(k) Contribution — % of IRS Annual Limit
+            <span id="k401-limit-note" style="color:var(--accent); font-weight:600;"></span>
+          </label>
+          <div class="input-suffix"><span>%</span><input type="number" id="k401" value="25" step="5" min="0" max="100" oninput="updateK401Display()"></div>
+          <div id="k401-dollar-display" style="font-size:0.75rem; color:var(--muted); margin-top:0.3rem;"></div>
+        </div>
+
+        <div class="field">
+          <label>Tax Deduction Method</label>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; margin-bottom:0.6rem;">
+            <button type="button" id="btn-standard" onclick="setDeductionType('standard')"
+              style="padding:0.5rem; border-radius:8px; border:2px solid var(--accent); background:#eff6ff; color:var(--blue); font-family:'DM Sans',sans-serif; font-size:0.8rem; font-weight:600; cursor:pointer;">
+              📋 Standard
+            </button>
+            <button type="button" id="btn-itemized" onclick="setDeductionType('itemized')"
+              style="padding:0.5rem; border-radius:8px; border:2px solid var(--border); background:white; color:var(--muted); font-family:'DM Sans',sans-serif; font-size:0.8rem; font-weight:600; cursor:pointer;">
+              📝 Itemized
+            </button>
+          </div>
+          <div id="standard-ded-display" style="background:#f0f9ff; border:1px solid #bae6fd; border-radius:8px; padding:0.6rem 0.8rem; font-size:0.78rem; color:#0369a1;">
+            <strong>Standard deduction applied:</strong> <span id="std-ded-amount"></span>
+          </div>
+          <div id="itemized-ded-fields" style="display:none;">
+            <div style="font-size:0.75rem; color:var(--muted); margin-bottom:0.4rem;">Enter itemized deductions below (must exceed standard to matter):</div>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+              <div>
+                <div style="font-size:0.72rem; color:var(--muted); margin-bottom:0.2rem;">Mortgage Interest</div>
+                <div class="input-prefix"><span>$</span><input type="number" id="ded-mortgage" value="0" step="100" oninput="updateItemizedTotal()" style="padding-left:1.4rem; width:100%; padding:0.4rem 0.4rem 0.4rem 1.4rem; border:1.5px solid var(--border); border-radius:6px; font-size:0.82rem; font-family:'DM Sans',sans-serif;"></div>
+              </div>
+              <div>
+                <div style="font-size:0.72rem; color:var(--muted); margin-bottom:0.2rem;">State & Local Taxes (SALT)</div>
+                <div class="input-prefix"><span>$</span><input type="number" id="ded-salt" value="0" step="100" oninput="updateItemizedTotal()" style="padding-left:1.4rem; width:100%; padding:0.4rem 0.4rem 0.4rem 1.4rem; border:1.5px solid var(--border); border-radius:6px; font-size:0.82rem; font-family:'DM Sans',sans-serif;"></div>
+              </div>
+              <div>
+                <div style="font-size:0.72rem; color:var(--muted); margin-bottom:0.2rem;">Charitable Donations</div>
+                <div class="input-prefix"><span>$</span><input type="number" id="ded-charity" value="0" step="100" oninput="updateItemizedTotal()" style="padding-left:1.4rem; width:100%; padding:0.4rem 0.4rem 0.4rem 1.4rem; border:1.5px solid var(--border); border-radius:6px; font-size:0.82rem; font-family:'DM Sans',sans-serif;"></div>
+              </div>
+              <div>
+                <div style="font-size:0.72rem; color:var(--muted); margin-bottom:0.2rem;">Other Deductions</div>
+                <div class="input-prefix"><span>$</span><input type="number" id="ded-other" value="0" step="100" oninput="updateItemizedTotal()" style="padding-left:1.4rem; width:100%; padding:0.4rem 0.4rem 0.4rem 1.4rem; border:1.5px solid var(--border); border-radius:6px; font-size:0.82rem; font-family:'DM Sans',sans-serif;"></div>
+              </div>
+            </div>
+            <div id="itemized-total-display" style="margin-top:0.5rem; font-size:0.78rem; font-weight:600; color:var(--navy);"></div>
+          </div>
+        </div>
+
+        <div class="toggle-row" style="margin-top:1rem;">
+          <span class="toggle-label">Enable per-year overrides in table</span>
+          <label class="toggle"><input type="checkbox" id="enableOverrides" onchange="toggleOverrides()"><span class="toggle-slider"></span></label>
+        </div>
+
+        <button class="calc-btn" onclick="calculate()">Calculate Repayment →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: RESULTS -->
+  <div class="right-col">
+    <div id="results-area">
+      <div class="panel">
+        <div class="panel-body">
+          <div class="empty-state">
+            <div class="big-icon">💰</div>
+            <h3>Ready to calculate</h3>
+            <p>Fill in your loan details on the left and hit <strong>Calculate Repayment</strong> to see your full payment breakdown.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ===================== TAB: PLAN INFO ===================== -->
+<div class="content-section" id="tab-plan-info">
+  <div style="max-width:1000px; margin:2rem auto; padding:0 1.5rem; display:flex; flex-direction:column; gap:1.2rem;">
+    <div class="panel">
+      <div class="panel-header">📋 Repayment Plans at a Glance</div>
+      <div class="panel-body">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Plan</th><th>Eligible Borrowers</th><th>Term</th><th>Payment Calculation</th><th>Unpaid Interest</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="highlight">Standard Term</td>
+                <td>All federal loan borrowers</td>
+                <td>10–25 years based on debt</td>
+                <td>Fixed payments based on term</td>
+                <td>No unpaid monthly interest</td>
+              </tr>
+              <tr>
+                <td class="highlight">RAP</td>
+                <td>All federal borrowers (except Parent PLUS)</td>
+                <td>Up to 30 years, then taxable forgiveness</td>
+                <td>1–10% of annual AGI ÷ 12 (min $10)</td>
+                <td>Not charged to borrower</td>
+              </tr>
+              <tr>
+                <td class="highlight">IBR (post-2014)</td>
+                <td>Federal borrowers, no new loans after July 1, 2026</td>
+                <td>20 years</td>
+                <td>10% of discretionary income</td>
+                <td>Accrues, increases balance</td>
+              </tr>
+              <tr>
+                <td class="highlight">IBR (pre-2014)</td>
+                <td>Federal borrowers, no new loans after July 1, 2026</td>
+                <td>25 years</td>
+                <td>15% of discretionary income</td>
+                <td>Accrues, increases balance</td>
+              </tr>
+              <tr>
+                <td class="highlight">PAYE/ICR/SAVE</td>
+                <td>Past Direct Federal Loan borrowers</td>
+                <td>Sunsetting July 1, 2028</td>
+                <td>% of discretionary income</td>
+                <td>Accrues, increases balance</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="notice" style="margin-top:1rem;">
+          <strong>Note:</strong> Borrowers with new loans after July 1, 2026 can only use RAP as their IDR plan. PAYE/ICR/SAVE borrowers must transfer out by July 1, 2028 or will be moved to RAP.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== TAB: RAP TABLE ===================== -->
+<div class="content-section" id="tab-rap-table">
+  <div style="max-width:700px; margin:2rem auto; padding:0 1.5rem;">
+    <div class="panel">
+      <div class="panel-header">📊 RAP Monthly Payment by Income (AGI)</div>
+      <div class="panel-body">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>AGI Range</th><th>Monthly Payment</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>$10,000 or less</td><td class="highlight">$10 flat</td></tr>
+              <tr><td>$10,001 – $20,000</td><td class="highlight">1% of AGI ÷ 12</td></tr>
+              <tr><td>$20,001 – $30,000</td><td class="highlight">2% of AGI ÷ 12</td></tr>
+              <tr><td>$30,001 – $40,000</td><td class="highlight">3% of AGI ÷ 12</td></tr>
+              <tr><td>$40,001 – $50,000</td><td class="highlight">4% of AGI ÷ 12</td></tr>
+              <tr><td>$50,001 – $60,000</td><td class="highlight">5% of AGI ÷ 12</td></tr>
+              <tr><td>$60,001 – $70,000</td><td class="highlight">6% of AGI ÷ 12</td></tr>
+              <tr><td>$70,001 – $80,000</td><td class="highlight">7% of AGI ÷ 12</td></tr>
+              <tr><td>$80,001 – $90,000</td><td class="highlight">8% of AGI ÷ 12</td></tr>
+              <tr><td>$90,001 – $100,000</td><td class="highlight">9% of AGI ÷ 12</td></tr>
+              <tr><td>Over $100,000</td><td class="highlight">10% of AGI ÷ 12</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="plan-info" style="margin-top:1rem;">
+          RAP AGI = Gross Income − 401(k) contributions − other deductions. Unpaid interest is <strong>not charged</strong> to the borrower under RAP — this is a major benefit over IBR.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let selectedPlan = 'RAP';
+let overridesEnabled = false;
+let yearlyOverrides = {};
+let deductionType = 'standard';
+
+// 2025 IRS limits
+const K401_LIMIT = 23500; // employee contribution limit 2025
+const STANDARD_DED = { single: 15000, mfj: 30000 }; // 2025
+
+function getStandardDed() {
+  const filing = document.getElementById('filingStatus').value;
+  return STANDARD_DED[filing] || 15000;
+}
+
+function getItemizedTotal() {
+  const mortgage = parseFloat(document.getElementById('ded-mortgage').value) || 0;
+  const salt = Math.min(parseFloat(document.getElementById('ded-salt').value) || 0, 10000); // SALT cap
+  const charity = parseFloat(document.getElementById('ded-charity').value) || 0;
+  const other = parseFloat(document.getElementById('ded-other').value) || 0;
+  return mortgage + salt + charity + other;
+}
+
+function getEffectiveDeduction() {
+  if (deductionType === 'standard') return getStandardDed();
+  const itemized = getItemizedTotal();
+  const std = getStandardDed();
+  return Math.max(itemized, std); // always use whichever is higher
+}
+
+function updateK401Display() {
+  const pct = parseFloat(document.getElementById('k401').value) || 0;
+  const dollars = Math.round(K401_LIMIT * pct / 100);
+  const el = document.getElementById('k401-dollar-display');
+  const noteEl = document.getElementById('k401-limit-note');
+  if (el) el.textContent = `= $${dollars.toLocaleString()} / year  (IRS 2025 limit: $${K401_LIMIT.toLocaleString()})`;
+  if (noteEl) noteEl.textContent = pct >= 100 ? ' (max)' : '';
+}
+
+function updateDeductionDisplay() {
+  const std = getStandardDed();
+  const el = document.getElementById('std-ded-amount');
+  if (el) el.textContent = `$${std.toLocaleString()} (2025)`;
+  updateItemizedTotal();
+  updateK401Display();
+}
+
+function updateItemizedTotal() {
+  const itemized = getItemizedTotal();
+  const std = getStandardDed();
+  const el = document.getElementById('itemized-total-display');
+  if (!el) return;
+  const saltNote = (parseFloat(document.getElementById('ded-salt').value)||0) > 10000 ? ' ⚠️ SALT capped at $10,000' : '';
+  if (itemized > std) {
+    el.innerHTML = `✅ Itemized total: $${itemized.toLocaleString()} — saves $${(itemized - std).toLocaleString()} vs standard${saltNote}`;
+    el.style.color = 'var(--success)';
+  } else {
+    el.innerHTML = `⚠️ Itemized total: $${itemized.toLocaleString()} — standard deduction ($${std.toLocaleString()}) is still better${saltNote}`;
+    el.style.color = 'var(--warn)';
+  }
+}
+
+function setDeductionType(type) {
+  deductionType = type;
+  const btnStd = document.getElementById('btn-standard');
+  const btnItem = document.getElementById('btn-itemized');
+  const stdDisplay = document.getElementById('standard-ded-display');
+  const itemFields = document.getElementById('itemized-ded-fields');
+  if (type === 'standard') {
+    btnStd.style.borderColor = 'var(--accent)';
+    btnStd.style.background = '#eff6ff';
+    btnStd.style.color = 'var(--blue)';
+    btnItem.style.borderColor = 'var(--border)';
+    btnItem.style.background = 'white';
+    btnItem.style.color = 'var(--muted)';
+    stdDisplay.style.display = 'block';
+    itemFields.style.display = 'none';
+  } else {
+    btnItem.style.borderColor = 'var(--accent)';
+    btnItem.style.background = '#eff6ff';
+    btnItem.style.color = 'var(--blue)';
+    btnStd.style.borderColor = 'var(--border)';
+    btnStd.style.background = 'white';
+    btnStd.style.color = 'var(--muted)';
+    stdDisplay.style.display = 'none';
+    itemFields.style.display = 'block';
+    updateItemizedTotal();
+  }
+}
+
+// Initialize displays on load
+window.addEventListener('DOMContentLoaded', () => {
+  updateK401Display();
+  updateDeductionDisplay();
+});
+
+function switchTab(tab) {
+  document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+}
+
+function selectPlan(el) {
+  document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPlan = el.dataset.plan;
+  document.getElementById('standard-term-field').style.display = selectedPlan === 'STANDARD' ? 'block' : 'none';
+}
+
+function toggleOverrides() {
+  overridesEnabled = document.getElementById('enableOverrides').checked;
+}
+
+// ---- RAP rate from image ----
+function getRAPRate(agi) {
+  if (agi <= 10000) return 0; // returns $10 flat handled below
+  if (agi <= 20000) return 0.01;
+  if (agi <= 30000) return 0.02;
+  if (agi <= 40000) return 0.03;
+  if (agi <= 50000) return 0.04;
+  if (agi <= 60000) return 0.05;
+  if (agi <= 70000) return 0.06;
+  if (agi <= 80000) return 0.07;
+  if (agi <= 90000) return 0.08;
+  if (agi <= 100000) return 0.09;
+  return 0.10;
+}
+
+function getRAPMonthly(agi) {
+  if (agi <= 10000) return 10;
+  return Math.max(10, (getRAPRate(agi) * agi) / 12);
+}
+
+// Simplified federal poverty line for IBR discretionary income
+function getPovertyLine(filing) {
+  return filing === 'mfj' ? 20120 : 14580; // 2024 approx
+}
+
+function getIBRMonthly(agi, filing, pct) {
+  const disc = Math.max(0, agi - 1.5 * getPovertyLine(filing));
+  return Math.max(10, (pct * disc) / 12);
+}
+
+// Approximate standard monthly payment
+function getStandardMonthly(balance, annualRate, years) {
+  const r = annualRate / 12;
+  const n = years * 12;
+  if (r === 0) return balance / n;
+  return balance * r * Math.pow(1+r, n) / (Math.pow(1+r, n) - 1);
+}
+
+function fmt(n) {
+  return '$' + Math.round(n).toLocaleString();
+}
+function fmtDec(n, d=0) {
+  return '$' + n.toLocaleString('en-US', {minimumFractionDigits:d, maximumFractionDigits:d});
+}
+
+function calculate() {
+  const loanBalance = parseFloat(document.getElementById('loanBalance').value) || 0;
+  const annualRate = parseFloat(document.getElementById('interestRate').value) / 100 || 0;
+  const startIncome = parseFloat(document.getElementById('grossIncome').value) || 0;
+  const annualRaise = parseFloat(document.getElementById('annualRaise').value) / 100 || 0;
+  const k401LimitPct = parseFloat(document.getElementById('k401').value) / 100 || 0;
+  const baseK401dollars = Math.min(K401_LIMIT * k401LimitPct, K401_LIMIT);
+  const filing = document.getElementById('filingStatus').value;
+  const baseDeductions = getEffectiveDeduction();
+  const stdTerm = parseInt(document.getElementById('standardTerm').value) || 10;
+
+  let maxYears = selectedPlan === 'RAP' ? 30 : selectedPlan === 'IBR_PRE' ? 25 : selectedPlan === 'IBR_POST' ? 20 : stdTerm;
+
+  // Build year rows
+  let rows = [];
+  let balance = loanBalance;
+  let totalPaid = 0;
+  let totalInterest = 0;
+  let grossIncome = startIncome;
+
+  for (let yr = 1; yr <= maxYears; yr++) {
+    // Apply yearly income growth (raise based on previous year if no override)
+    if (yr > 1) grossIncome = grossIncome * (1 + annualRaise);
+
+    // Per-year overrides (set by editable table)
+    let k401dollars = baseK401dollars;
+    let extraDed = baseDeductions;
+    let override = yearlyOverrides[yr] || {};
+    let overrideIncome = override.income != null ? parseFloat(override.income) : null;
+    if (overrideIncome != null && overrideIncome > 0) grossIncome = overrideIncome;
+    // override.k401 stored as % of IRS limit
+    if (override.k401 != null) k401dollars = Math.min(K401_LIMIT * parseFloat(override.k401) / 100, K401_LIMIT);
+    if (override.deductions != null) extraDed = parseFloat(override.deductions);
+
+    const k401Amount = Math.min(k401dollars, grossIncome * 0.9); // can't exceed ~income
+    const agi = Math.max(0, grossIncome - k401Amount - extraDed);
+
+    let monthlyPayment = 0;
+    if (selectedPlan === 'RAP') {
+      monthlyPayment = getRAPMonthly(agi);
+    } else if (selectedPlan === 'IBR_POST') {
+      monthlyPayment = getIBRMonthly(agi, filing, 0.10);
+    } else if (selectedPlan === 'IBR_PRE') {
+      monthlyPayment = getIBRMonthly(agi, filing, 0.15);
+    } else {
+      monthlyPayment = getStandardMonthly(balance > 0 ? loanBalance : 0, annualRate, stdTerm);
+    }
+
+    // Interest accrual
+    const annualInterest = balance * annualRate;
+    const annualPayment = monthlyPayment * 12;
+    let interestCharged = 0;
+    let interestForgiven = 0;
+
+    if (selectedPlan === 'RAP') {
+      // RAP: unpaid interest NOT charged to borrower
+      interestForgiven = Math.max(0, annualInterest - annualPayment);
+      interestCharged = Math.min(annualInterest, annualPayment);
+      balance = Math.max(0, balance - (annualPayment - interestCharged));
+    } else if (selectedPlan === 'STANDARD') {
+      interestCharged = annualInterest;
+      balance = Math.max(0, balance + annualInterest - annualPayment);
+    } else {
+      // IBR: interest accrues
+      interestCharged = annualInterest;
+      balance = Math.max(0, balance + annualInterest - annualPayment);
+    }
+
+    const actualPaid = Math.min(annualPayment, balance + annualPayment); // actual paid this year
+    totalPaid += annualPayment;
+    totalInterest += interestCharged;
+
+    rows.push({
+      yr, grossIncome, k401Amount, agi, monthlyPayment, annualPayment,
+      interestCharged, interestForgiven, balance,
+      hasOverride: !!override.income || !!override.k401 || !!override.deductions
+    });
+
+    if (balance <= 0) break;
+  }
+
+  // Forgiveness amount
+  const forgiven = balance > 0 ? balance : 0;
+  const totalCost = totalPaid + forgiven; // forgiven is taxable under RAP
+
+  renderResults(rows, {
+    totalPaid, totalInterest, forgiven, totalCost,
+    loanBalance, annualRate, maxYears, filing
+  });
+}
+
+function renderResults(rows, summary) {
+  const area = document.getElementById('results-area');
+
+  let tableRows = rows.map((r, i) => {
+    const isPromo = r.hasOverride;
+    let incomeCell, k401Cell, dedCell;
+
+    if (overridesEnabled) {
+      const ov = yearlyOverrides[r.yr] || {};
+      incomeCell = `<td class="editable-cell"><input type="number" value="${Math.round(r.grossIncome)}" 
+        onchange="setOverride(${r.yr},'income',this.value)" placeholder="Income"></td>`;
+      k401Cell = `<td class="editable-cell"><input type="number" value="${Math.round(document.getElementById('k401').value)}" 
+        onchange="setOverride(${r.yr},'k401',this.value)" placeholder="% of limit" title="% of IRS $${K401_LIMIT.toLocaleString()} limit"></td>`;
+      dedCell = `<td class="editable-cell"><input type="number" value="${Math.round(document.getElementById('otherDeductions').value)}" 
+        onchange="setOverride(${r.yr},'deductions',this.value)" placeholder="Deductions"></td>`;
+    } else {
+      incomeCell = `<td>${fmt(r.grossIncome)}${isPromo ? '<span class="promo-indicator">✏️</span>' : ''}</td>`;
+      k401Cell = `<td>${fmt(r.k401Amount)}</td>`;
+      dedCell = `<td>—</td>`;
+    }
+
+    const rapNote = selectedPlan === 'RAP' && r.interestForgiven > 0
+      ? `<span class="badge badge-green" title="RAP waived ${fmt(r.interestForgiven)} interest">💚 ${fmt(r.interestForgiven)} waived</span>`
+      : '';
+
+    return `<tr>
+      <td class="highlight">Year ${r.yr}</td>
+      ${incomeCell}
+      ${k401Cell}
+      <td>${fmt(r.agi)}</td>
+      <td class="highlight">${fmt(r.monthlyPayment)}/mo</td>
+      <td>${fmt(r.annualPayment)}</td>
+      <td>${rapNote || fmt(r.interestCharged)}</td>
+      <td>${fmt(r.balance)}</td>
+    </tr>`;
+  }).join('');
+
+  const forgivenRow = summary.forgiven > 0 ? `
+    <tr style="background:#fef3c7;">
+      <td colspan="7" style="font-weight:600; color:#92400e; padding:0.7rem 0.8rem;">
+        ⚠️ Remaining balance forgiven after ${rows.length} years: ${fmt(summary.forgiven)} 
+        ${selectedPlan === 'RAP' ? '(taxable income in forgiveness year under RAP)' : ''}
+      </td>
+      <td style="font-weight:700; color:#92400e;">${fmt(summary.forgiven)}</td>
+    </tr>` : '';
+
+  const overrideCol = overridesEnabled ? '<th>Deductions ($)</th>' : '<th>Deductions</th>';
+
+  area.innerHTML = `
+    <div class="summary-grid">
+      <div class="summary-card">
+        <div class="s-label">Total Payments Made</div>
+        <div class="s-value">${fmt(summary.totalPaid)}</div>
+        <div class="s-sub">Over ${rows.length} year${rows.length !== 1 ? 's' : ''}</div>
+      </div>
+      <div class="summary-card gold">
+        <div class="s-label">Total Interest Paid</div>
+        <div class="s-value">${fmt(summary.totalInterest)}</div>
+        <div class="s-sub">On ${fmt(summary.loanBalance)} principal</div>
+      </div>
+      <div class="summary-card green">
+        <div class="s-label">${summary.forgiven > 0 ? 'Amount Forgiven' : 'Balance Paid Off'}</div>
+        <div class="s-value">${summary.forgiven > 0 ? fmt(summary.forgiven) : '✅ $0'}</div>
+        <div class="s-sub">${summary.forgiven > 0 ? (selectedPlan==='RAP'?'Taxable forgiveness':'Forgiven') : 'Fully repaid'}</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-header">📅 Year-by-Year Breakdown
+        <span style="font-size:0.72rem; opacity:0.75; margin-left:0.5rem;">
+          ${deductionType === 'standard' ? '📋 Standard deduction' : '📝 Itemized deduction'} applied
+          · 401(k): ${document.getElementById('k401').value}% of IRS limit = $${Math.round(K401_LIMIT * parseFloat(document.getElementById('k401').value)/100).toLocaleString()}/yr
+        </span>
+        ${overridesEnabled ? '<span style="font-size:0.72rem; opacity:0.8; margin-left:auto;">✏️ Edit any cell to override</span>' : ''}
+      </div>
+      <div class="panel-body" style="padding:0;">
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Year</th>
+                <th>Gross Income</th>
+                <th>401(k)</th>
+                <th>AGI</th>
+                <th>Monthly Payment</th>
+                <th>Annual Total</th>
+                <th>Interest</th>
+                <th>Remaining Balance</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows}
+              ${forgivenRow}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="notice">
+      <strong>Disclaimer:</strong> This calculator uses the RAP rate table and plan rules from the AccessLex Institute charts. 
+      IBR discretionary income uses ~150% federal poverty line. Tax calculations are estimates. 
+      Consult a financial advisor or studentaid.gov for official figures.
+    </div>
+  `;
+}
+
+function setOverride(yr, field, val) {
+  if (!yearlyOverrides[yr]) yearlyOverrides[yr] = {};
+  yearlyOverrides[yr][field] = val;
+  calculate();
+}
+</script>
+</body>
+</html>
